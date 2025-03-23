@@ -26,7 +26,6 @@ const Register: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    console.log(`Field: ${id}, Value: ${value}`);
     setFormData((prev) => ({
       ...prev,
       [id]: value,

@@ -13,8 +13,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       transports: ['websocket'],
       withCredentials: true,
     });
-    console.log("suiiii",newSocket);
-    
     setSocket(newSocket);
 
     return () => {

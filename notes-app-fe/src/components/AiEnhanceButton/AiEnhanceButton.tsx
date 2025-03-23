@@ -24,8 +24,6 @@ const AiEnhanceButton: React.FC<{ content: string }> = ({
 			);
 
 			if (response.status === 201) {
-				console.log(response.data.enhancedContent);
-
 				const enhancedText = response.data.enhancedContent;
 				setEnhancedContent(enhancedText);
 				setShowEnhanced(true);

@@ -49,7 +49,6 @@ const Dashboard: React.FC = () => {
 		if (!socket) return;
 
 		socket.on('noteCreated', (newNote: any) => {
-			console.log('Received noteCreated event:', newNote);
 			dispatch({
 				type: 'ADD_NOTE',
 				payload: {
@@ -62,8 +61,14 @@ const Dashboard: React.FC = () => {
 			});
 		});
 
+		socket.on('noteDeleted', (newNote: any) => {			
+			dispatch({
+				type: 'DELETE_NOTE',
+				payload: newNote,
+			});
+		});
+
 		socket.on('noteUpdated', (updatedNote: any) => {
-			console.log('Received noteUpdated event:', updatedNote);
 			dispatch({
 				type: 'UPDATE_NOTE_POSITION',
 				payload: {
