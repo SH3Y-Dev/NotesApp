@@ -14,11 +14,13 @@ export class NotesService {
   }
 
   async findAll(): Promise<Note[]> {
-    return this.noteModel.find().exec();
+    return this.noteModel.find({ isDeleted: false }).exec();
   }
 
   async findOne(id: string): Promise<Note> {
-    const note = await this.noteModel.findOne({ _id: id }).exec();
+    const note = await this.noteModel
+      .findOne({ _id: id, isDeleted: false })
+      .exec();
     if (!note) {
       throw new NotFoundException(`Note with ID ${id} not found`);
     }
@@ -26,9 +28,11 @@ export class NotesService {
   }
 
   async update(id: string, updateNoteDto: UpdateNoteDto): Promise<Note> {
-    const note = await this.noteModel.findByIdAndUpdate(id, updateNoteDto, {
-      new: true,
-    });
+    const note = await this.noteModel.findByIdAndUpdate(
+      id,
+      { ...updateNoteDto, isDeleted: false },
+      { new: true },
+    );
     if (!note) {
       throw new NotFoundException(`Note with ID ${id} not found`);
     }
@@ -36,9 +40,21 @@ export class NotesService {
   }
 
   async delete(id: string): Promise<void> {
-    const result = await this.noteModel.findOneAndDelete({ _id: id }).exec();
+    const result = await this.noteModel
+      .findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+      .exec();
     if (!result) {
       throw new NotFoundException(`Note with ID ${id} not found`);
     }
+  }
+
+  async restore(id: string): Promise<Note> {
+    const note = await this.noteModel
+      .findByIdAndUpdate(id, { isDeleted: false }, { new: true })
+      .exec();
+    if (!note) {
+      throw new NotFoundException(`Note with ID ${id} not found`);
+    }
+    return note;
   }
 }

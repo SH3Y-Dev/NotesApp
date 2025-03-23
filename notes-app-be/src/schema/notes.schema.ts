@@ -17,6 +17,9 @@ export class Note extends Document {
 
   @Prop({ default: 0 })
   y: number;
+
+  @Prop({ default: false })
+  isDeleted: boolean;
 }
 
 export const NoteSchema = SchemaFactory.createForClass(Note);
