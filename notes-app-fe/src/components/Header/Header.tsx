@@ -33,7 +33,7 @@ const Header: React.FC = () => {
 	const [showEnhanced, setShowEnhanced] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const toast = useToast();
-
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const enhancedBoxBgColor = useColorModeValue('gray.100', 'gray.700');
 	const enhancedBoxBorderColor = useColorModeValue('gray.200', 'gray.600');
 	const enhancedTextColor = useColorModeValue('gray.800', 'gray.200');
@@ -48,28 +48,51 @@ const Header: React.FC = () => {
 		});
 	};
 
-	const isPositionEmpty = (x: number, y: number) => {
-		return !state.notes.some(
-			(note) => Math.abs(note.x - x) < 100 && Math.abs(note.y - y) < 100,
-		);
-	};
+const GRID_CELL_WIDTH = 320;
+const GRID_CELL_HEIGHT = 120;
+const GRID_COLUMNS = 3;
+const STARTING_OFFSET_X = 20; 
+const STARTING_OFFSET_Y = 20; 
 
-	const findEmptyPosition = () => {
-		let x = Math.floor(Math.random() * 400);
-		let y = Math.floor(Math.random() * 200);
 
-		while (!isPositionEmpty(x, y)) {
-			x = Math.floor(Math.random() * 400);
-			y = Math.floor(Math.random() * 200);
-		}
+const isPositionEmpty = (x: number, y: number, notes: any[]) => {
+  return !notes.some(
+    (note) => 
+      Math.abs(note.x - x) < GRID_CELL_WIDTH - 20 && 
+      Math.abs(note.y - y) < GRID_CELL_HEIGHT - 20
+  );
+};
 
-		return { x, y };
-	};
+const findEmptyPosition = (notes: any[]) => {
+  const totalPositions = 50;
+  
+  for (let i = 0; i < totalPositions; i++) {
+    const col = i % GRID_COLUMNS;
+    const row = Math.floor(i / GRID_COLUMNS);
+    
+    const x = STARTING_OFFSET_X + (col * GRID_CELL_WIDTH);
+    const y = STARTING_OFFSET_Y + (row * GRID_CELL_HEIGHT);
+    
+    if (isPositionEmpty(x, y, notes)) {
+      return { x, y };
+    }
+  }
+  
+  let x = STARTING_OFFSET_X + Math.floor(Math.random() * 400);
+  let y = STARTING_OFFSET_Y + Math.floor(Math.random() * 400);
+  let attempts = 0;
+  
+  while (!isPositionEmpty(x, y, notes) && attempts < 50) {
+    x = STARTING_OFFSET_X + Math.floor(Math.random() * 400);
+    y = STARTING_OFFSET_Y + Math.floor(Math.random() * 400);
+    attempts++;
+  }
+  
+  return { x, y };
+};
 
 	const handleSubmit = async () => {
-		const { x, y } = findEmptyPosition();
-		console.log(x, y);
-
+		const { x, y } = findEmptyPosition(state.notes);
 		const newNote = {
 			id: uuidv4(),
 			title: formData.title,
@@ -93,7 +116,7 @@ const Header: React.FC = () => {
 					duration: 2000,
 					isClosable: true,
 				});
-				// TODO: Close the dialog
+				setIsDialogOpen(false);
 				resetForm();
 			}
 		} catch (error) {
@@ -148,7 +171,7 @@ const Header: React.FC = () => {
 					Notes App
 				</Heading>
 				<Flex>
-					<Dialog.Root placement='top' motionPreset='slide-in-bottom'>
+					<Dialog.Root placement='top' motionPreset='slide-in-bottom' isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
 						<Dialog.Trigger asChild>
 							<Button colorScheme='teal' variant='outline' color='white' mr={2}>
 								Add Note
@@ -170,7 +193,6 @@ const Header: React.FC = () => {
 													value={formData.title}
 													onChange={handleInputChange}
 													placeholder='Enter note title'
-													focusBorderColor='teal.500'
 													bg='white'
 													color='black'
 												/>
@@ -185,7 +207,6 @@ const Header: React.FC = () => {
 													placeholder='Enter note content'
 													size='md'
 													rows={5}
-													focusBorderColor='teal.500'
 													bg='white'
 													color='black'
 												/>
@@ -216,7 +237,7 @@ const Header: React.FC = () => {
 										</VStack>
 									</Dialog.Body>
 									<Dialog.Footer>
-										<Button colorScheme='teal' mr={3} onClick={handleSubmit}>
+										<Button colorScheme='teal' mr={3} onClick={handleSubmit} disabled={!formData.title.trim() || !formData.content.trim()} >
 											Save Note
 										</Button>
 										<AiEnhanceButton

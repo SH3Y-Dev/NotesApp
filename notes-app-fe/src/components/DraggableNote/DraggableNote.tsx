@@ -14,6 +14,7 @@ import axiosInstance from '../../axios/axios.instance';
 import { useToast } from '@chakra-ui/toast';
 import AiEnhanceButton from '../AiEnhanceButton/AiEnhanceButton';
 import { useColorModeValue } from '../ui/color-mode';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 	const { dispatch } = useNotes();
@@ -128,8 +129,8 @@ const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 
 			if (response.status === 200) {
 				dispatch({
-					type: 'UPDATE_NOTE_POSITION',
-					payload: { ...note, title: editedTitle, content: editedContent },
+					type: 'UPDATE_NOTE',
+					payload: { id: note.id, title: editedTitle, content: editedContent },
 				});
 
 				setIsEditing(false);
@@ -155,7 +156,7 @@ const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 
 	const handleDelete = async () => {
 		try {
-			setIsDeleted(true); // Mark as deleted before API call to prevent UI jumps
+			setIsDeleted(true);
 
 			const response = await axiosInstance.delete(
 				`${process.env.REACT_APP_BE_URL}/notes/${note.id}`,
@@ -188,7 +189,6 @@ const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 		}
 	};
 
-	// If note is deleted, don't render anything
 	if (isDeleted) {
 		return null;
 	}
@@ -210,8 +210,13 @@ const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 				bg='white'
 				boxShadow='md'
 				width='300px'
+				height='auto'
+				minHeight='100px'
 				cursor={isEditing ? 'default' : 'move'}
 				color='black'
+				position='absolute'
+				zIndex={isEditing ? 10 : 1}
+				className={`note-${note.id}`}
 			>
 				{isEditing ? (
 					<>
@@ -261,7 +266,7 @@ const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 									content={editedContent}
 									setEnhancedContent={setEnhancedContent}
 									setShowEnhanced={setShowEnhanced}
-								></AiEnhanceButton>
+								/>
 							</Flex>
 							<Flex>
 								<Button
@@ -286,14 +291,14 @@ const DraggableNote: React.FC<{ note: any }> = ({ note }) => {
 							</Heading>
 							<Box>
 								<Button size='xs' mr={1} onClick={handleEdit}>
-									Edit
+									<FaEdit />
 								</Button>
 								<Button size='xs' colorScheme='red' onClick={handleDelete}>
-									Del
+									<FaTrash />
 								</Button>
 							</Box>
 						</Flex>
-						<Text noOfLines={3}>{note.content}</Text>
+						<Text>{note.content}</Text>
 					</>
 				)}
 			</Box>
