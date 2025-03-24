@@ -47,14 +47,4 @@ export class NotesService {
       throw new NotFoundException(`Note with ID ${id} not found`);
     }
   }
-
-  async restore(id: string): Promise<Note> {
-    const note = await this.noteModel
-      .findByIdAndUpdate(id, { isDeleted: false }, { new: true })
-      .exec();
-    if (!note) {
-      throw new NotFoundException(`Note with ID ${id} not found`);
-    }
-    return note;
-  }
 }
